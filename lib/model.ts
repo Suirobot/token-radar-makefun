@@ -5,7 +5,9 @@
 // - peer multiple: the median market-cap / TVL ratio of the protocols in the same
 //   DefiLlama category whose token already trades (at least 3 peers, else the global
 //   median over every tokenised protocol), clamped to [0.05, 1.50] so one thin
-//   category cannot dominate the board.
+//   category cannot dominate the board. A category with fewer than 8 traded peers
+//   is shrunk toward the global median with a prior weight of 4, so a median built
+//   on three or four sales never prices a launch on its own.
 // - growth factor: the protocol's own 7-day TVL change, clamped to +/-40%, halved
 //   before it is applied, so a hot week moves the price by at most +/-20%.
 // - maturity factor: +3.5% for each year the protocol has been tracked with no
@@ -120,14 +122,16 @@ function peerMultiples(snapshot: Snapshot): { byCategory: Map<string, { multiple
       ratios.set(key, list);
     }
   }
-  const global = median(all);
+  const globalRaw = median(all);
   const byCategory = new Map<string, { multiple: number; peers: number }>();
   for (const [category, list] of ratios) {
     if (list.length >= 3) {
-      byCategory.set(category, { multiple: clamp(median(list), 0.05, 1.5), peers: list.length });
+      const catMedian = median(list);
+      const blended = list.length >= 8 ? catMedian : (list.length * catMedian + 4 * globalRaw) / (list.length + 4);
+      byCategory.set(category, { multiple: clamp(blended, 0.05, 1.5), peers: list.length });
     }
   }
-  return { byCategory, global: clamp(global, 0.05, 1.5) };
+  return { byCategory, global: clamp(globalRaw, 0.05, 1.5) };
 }
 
 function yearsBetween(from: string, to: string): number {

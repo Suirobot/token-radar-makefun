@@ -131,7 +131,7 @@
       '<section class="method"><h2>How the board prices a launch that has not happened</h2>' +
       '<p>Every protocol on this board records no token in the snapshot (no CoinGecko id, no ticker, no market cap), and wrapped, staked, bridged or exchange products of tokens that already trade are left out. The watchlist is the house floor: TVL at or above ' + money(R.floor_usd) + '. The radar treats that list as a floor, not a ceiling: it adds the strongest further protocols that record no token and pass the same exclusions the snapshot\'s fields allow, above and below the floor alike.</p>' +
       '<ul><li><code>implied = TVL x peer multiple x growth factor x maturity factor</code></li>' +
-      '<li>Peer multiple: the median market-cap / TVL of tokenised protocols in the same category (at least 3 peers, else the global median of ' + R.stats.global_multiple.toFixed(3) + 'x), clamped to 0.05x-1.50x.</li>' +
+      '<li>Peer multiple: the median market-cap / TVL of tokenised protocols in the same category (at least 3 peers, else the global median of ' + R.stats.global_multiple.toFixed(3) + 'x), clamped to 0.05x-1.50x and shrunk toward the global median when the category has fewer than 8 traded peers.</li>' +
       '<li>Growth factor: the protocol\'s own 7-day TVL change, clamped to +/-40% and halved, so one hot week moves the price at most +/-20%.</li>' +
       '<li>Maturity factor: +3.5% per year tracked with no token, capped at 6 years: a long tokenless record is an established product a launch would be priced on.</li></ul>' +
       '<p>Click any row for the protocol\'s figures, its model breakdown and the steps to farm it.</p></section>';
@@ -201,7 +201,7 @@
       '<div class="kv"><span class="kk">Multiple source</span><span class="vv">' + peerLine + '</span></div>' +
       '<div class="kv"><span class="kk">Growth factor (7d ' + (r.change_7d === null ? 'n/a' : r.change_7d.toFixed(1) + '%') + ')</span><span class="vv">x' + r.growth_factor.toFixed(3) + '</span></div>' +
       '<div class="kv"><span class="kk">Maturity factor (' + years(r.years_tokenless) + ' tokenless)</span><span class="vv">x' + r.maturity_factor.toFixed(3) + '</span></div>' +
-      '<p class="formula"><code>' + moneyFull(r.tvl_usd) + ' x ' + r.multiple.toFixed(3) + ' x ' + r.growth_factor.toFixed(3) + ' x ' + r.maturity_factor.toFixed(3) + ' = ' + moneyFull(r.implied_value_usd) + '</code></p>' +
+      '<p class="formula"><code>' + moneyFull(r.tvl_usd) + ' x ' + r.multiple.toFixed(3) + ' x ' + r.growth_factor.toFixed(3) + ' x ' + r.maturity_factor.toFixed(3) + ' &asymp; ' + moneyFull(r.implied_value_usd) + '</code> (factors shown rounded)</p>' +
       '<p class="formula">That prices the launch at ' + (r.implied_value_usd / r.tvl_usd).toFixed(2) + 'x the value the protocol already holds. It is this board\'s claim from the snapshot\'s figures, not a forecast that a token will come.</p>' +
       '</section></div>' +
       '<section class="card" style="margin-top:12px"><h3>Farm plan — what to do before any launch</h3>' +
